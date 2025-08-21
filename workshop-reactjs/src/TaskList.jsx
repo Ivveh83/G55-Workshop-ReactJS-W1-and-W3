@@ -1,3 +1,5 @@
+import { searchTasks } from "./taskService";
+
 const TaskListHeader = () => {
   return (
     <>
@@ -16,55 +18,76 @@ const TaskListHeader = () => {
   );
 };
 
-const TaskList = () => {
+const TaskList = ({ setTaskUpdate, tasks, setTasks, filteredTasks, setFilteredTasks, setUpdateMode}) => {
   return (
     <>
       <div className="card shadow-sm mx-5 mt-5">
         <TaskListHeader />
 
         {/* Task List */}
-        <div className="card-body" id="todo-list">
-          <div className="border rounded p-3 mb-3">
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 className="mb-1">title....</h6>
-                <small className="text-muted">description.....</small>
-              </div>
-              <div className="d-flex justify-content-end">
-                <small className="text-muted mx-3">Created: 2023-02-02</small>
-                <button
-                  className="btn btn-sm btn-outline-success me-1"
-                  title="Done"
-                >
-                  <i className="bi bi-check-lg"></i>
-                </button>
-                <button
-                  className="btn btn-sm btn-outline-primary me-1"
-                  title="Edit"
-                >
-                  <i className="bi bi-pencil"></i>
-                </button>
-                <button
-                  className="btn btn-sm btn-outline-danger"
-                  title="Delete"
-                >
-                  <i className="bi bi-trash"></i>
-                </button>
+        {filteredTasks.length > 0 ? (
+          filteredTasks.map((task) => (
+            <div className="card-body" id="todo-list" key={task.id}>
+              <div className="border rounded p-3 mb-3">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="mb-1">{task.title}</h6>
+                    <small className="text-muted">{task.description}</small>
+                  </div>
+                  <div className="d-flex justify-content-end">
+                    <small className="text-muted mx-3">{task.createdAt.slice(0, 10)}</small>
+                    <button
+                      className="btn btn-sm btn-outline-success me-1"
+                      title="Done"
+                    >
+                      <i className="bi bi-check-lg"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-primary me-1"
+                      title="Edit"
+                      onClick={() => {
+                        setTaskUpdate(task);
+                        setUpdateMode(true);
+                      }}
+                    >
+                      <i className="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      title="Delete"
+                      onClick={() => {
+                        // Handle delete action
+                        setTasks(tasks.filter(t => t.id !== task.id));
+                        setFilteredTasks(filteredTasks.filter(t => t.id !== task.id));
+                      }}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 d-flex flex-wrap gap-2">
+                  <span className="bg-white text-secondary">
+                    <i className="bi bi-calendar2-day me-1"></i>
+                    {task.dueDate}
+                  </span>
+                  <span className="badge bg-info">
+                    <i className="bi bi-person-fill me-1"></i>{" "}
+                    {task.assignedTo || "Unassigned"}
+                  </span>
+                  <span className="badge bg-secondary">
+                    <i className="bi bi-paperclip me-1"></i>{" "}
+                    {task.attachments ? task.attachments.length : 0}{" "}
+                    attachment(s)
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="mt-2 d-flex flex-wrap gap-2">
-              <span className="bg-white text-secondary">
-                <i className="bi bi-calendar2-day me-1"></i> Due: 2023-10-31
-              </span>
-              <span className="badge bg-info">
-                <i className="bi bi-person-fill me-1"></i> person
-              </span>
-              <span className="badge bg-secondary">
-                <i className="bi bi-paperclip me-1"></i> 1 attachment(s)
-              </span>
-            </div>
+          ))
+        ) : (
+          <div className="card-body text-center">
+            <p className="text-muted">No tasks available. Please add a task.</p>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

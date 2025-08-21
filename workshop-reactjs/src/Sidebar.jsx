@@ -3,7 +3,7 @@ const SidebarContent = () => (
     <div>
       <div className="d-flex align-items-center px-3 mb-4">
         <img
-          src="https://via.placeholder.com/40"
+          src="assets/logo.png"
           alt="Logo"
           style={{
             height: "40px",
