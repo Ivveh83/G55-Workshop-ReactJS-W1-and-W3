@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import HamburgerButton from "./HamburgerButton.jsx";
 import Sidebar from "./Sidebar.jsx";
@@ -19,8 +19,9 @@ const App = () => {
     createdAt: "",
     assignedTo: "",
     attachments: [],
+    taskDone: false,
   });
-  
+  const [attachmentList, setAttachmentList] = useState([]);
 
   return (
     <>
@@ -31,15 +32,39 @@ const App = () => {
           <Sidebar />
 
           <main className="col-md-10 ms-sm-auto px-md-4 py-4">
-            <Topbar tasks={tasks} setTasks={setFilteredTasks}/>
-            { updateMode ? (
-              <EditForm task={taskUpdate} setTask={setTaskUpdate} tasks={tasks} setTasks={setTasks} filteredTasks={filteredTasks} setFilteredTasks={setFilteredTasks} setUpdateMode={setUpdateMode}/>
+            <Topbar tasks={tasks} setTasks={setFilteredTasks} />
+            {updateMode ? (
+              <EditForm
+                task={taskUpdate}
+                setTask={setTaskUpdate}
+                tasks={tasks}
+                setTasks={setTasks}
+                filteredTasks={filteredTasks}
+                setFilteredTasks={setFilteredTasks}
+                setUpdateMode={setUpdateMode}
+                attachmentList={attachmentList}
+                setAttachmentList={setAttachmentList}
+              />
             ) : (
-              <TaskForm tasks={tasks} setTasks={setTasks} setFilteredTasks={setFilteredTasks}/>
+              <TaskForm
+                tasks={tasks}
+                setTasks={setTasks}
+                setFilteredTasks={setFilteredTasks}
+                attachmentList={attachmentList}
+                setAttachmentList={setAttachmentList}
+              />
             )}
-            
 
-            <TaskList setTaskUpdate={setTaskUpdate} tasks={tasks} setTasks={setTasks} filteredTasks={filteredTasks} setFilteredTasks={setFilteredTasks} setUpdateMode={setUpdateMode}/>
+            <TaskList
+              setTaskUpdate={setTaskUpdate}
+              tasks={tasks}
+              setTasks={setTasks}
+              filteredTasks={filteredTasks}
+              setFilteredTasks={setFilteredTasks}
+              setUpdateMode={setUpdateMode}
+              setAttachmentList={setAttachmentList}
+              attachmentList={attachmentList}
+            />
           </main>
         </div>
       </div>

@@ -8,6 +8,8 @@ const EditForm = ({
   filteredTasks,
   setFilteredTasks,
   setUpdateMode,
+  attachmentList,
+  setAttachmentList
 }) => {
   const {
     register,
@@ -32,7 +34,7 @@ const EditForm = ({
         : data.assignedTo;
     const updatedTask = {
       ...data,
-      attachments: data.attachments ? Array.from(data.attachments) : [],
+      attachments: attachmentList ? Array.from(attachmentList) : [],
     };
     setTask(updatedTask);
     setTasks(tasks.map((t) => (t.id === task.id ? updatedTask : t)));
@@ -41,6 +43,7 @@ const EditForm = ({
     );
     console.log("Updated task: ", updatedTask);
     setUpdateMode(false); // Reset update state after submission
+    setAttachmentList([]); // Clear the attachment list after submission
   };
 
   return (
@@ -84,22 +87,25 @@ const EditForm = ({
                 Due Date
               </label>
               <small className="text-danger">
-              {errors.dueDate && errors.dueDate.message}&nbsp;
-            </small>
+                {errors.dueDate && errors.dueDate.message}&nbsp;
+              </small>
               <input
                 type="date"
                 id="dueDate"
                 className="form-control"
                 {...register("dueDate", {
-                    required: " is required",
-                    validate: (value) => {
-                      const creationDay = new Date(task.createdAt);
-                      creationDay.setHours(0, 0, 0, 0); // nollställ tid
-                      const selected = new Date(value);
+                  required: " is required",
+                  validate: (value) => {
+                    const creationDay = new Date(task.createdAt);
+                    creationDay.setHours(0, 0, 0, 0); // nollställ tid
+                    const selected = new Date(value);
 
-                      return selected >= creationDay || " cannot be earlier than creation date";
-                    },
-                  })}
+                    return (
+                      selected >= creationDay ||
+                      " cannot be earlier than creation date"
+                    );
+                  },
+                })}
               />
             </div>
             <div className="col-md-6 mb-3">
@@ -126,12 +132,38 @@ const EditForm = ({
               type="file"
               className="form-control"
               id="attachments"
+              value={""} // Reset value to allow re-uploading the same file
               multiple
               {...register("attachments")}
+              onChange={(e) => {
+                  setAttachmentList(Array.from(e.target.files));
+                }}
             />
           </div>
           <div className="mt-3 border p-2">
-            <ul id="attachmentList" className="list-group mt-5"></ul>
+            <ul id="attachmentList" className="list-group mt-5">
+              {attachmentList.length > 0 && (
+                attachmentList.map((file, index) => (
+                  <li
+                    key={index}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-danger"
+                      onClick={() => {
+                        setAttachmentList(
+                          attachmentList.filter((_, i) => i !== index)
+                        );
+                      }}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
           </div>
 
           <div className="d-flex justify-content-end mt-3">

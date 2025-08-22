@@ -1,28 +1,148 @@
-import { searchTasks } from "./taskService";
+import { sortTasks, filterTasks } from "./taskService";
 
-const TaskListHeader = () => {
+const TaskListHeader = ({ setFilteredTasks, tasks }) => {
   return (
     <>
       <div className="card-header bg-white d-flex justify-content-between align-items-center px-3">
         <h5 className="mb-0">Todos</h5>
         <div className="btn-group">
-          <button className="btn btn-outline-secondary btn-sm" title="Filter">
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            title="Filter"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
             <i className="bi bi-filter"></i>
           </button>
-          <button className="btn btn-outline-secondary btn-sm" title="Sort">
+          <ul className="dropdown-menu">
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => setFilteredTasks(filterTasks(tasks, "done"))}
+              >
+                <i className="bi bi-check-square-fill me-2"></i>
+                Show Done Tasks
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => setFilteredTasks(filterTasks(tasks, "notDone"))}
+              >
+                <i className="bi bi-check-square me-2"></i>
+                Show Not Done Tasks
+              </button>
+            </li>
+          </ul>
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            title="Sort"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
             <i className="bi bi-sort-down"></i>
           </button>
+          <ul className="dropdown-menu">
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => setFilteredTasks(sortTasks(tasks, "titleA-Z"))}
+              >
+                <i className="bi bi-sort-alpha-down me-2"></i>
+                Sort by Title (A-Z)
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => setFilteredTasks(sortTasks(tasks, "titleZ-A"))}
+              >
+                <i className="bi bi-sort-alpha-up me-2"></i>
+                Sort by Title (Z-A)
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() =>
+                  setFilteredTasks(sortTasks(tasks, "dueDateAscending"))
+                }
+              >
+                <i className="bi bi-calendar2-day me-2"></i>
+                Sort by Due Date (Lo-Hi)
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() =>
+                  setFilteredTasks(sortTasks(tasks, "dueDateDescending"))
+                }
+              >
+                <i className="bi bi-calendar2-day me-2"></i>
+                Sort by Due Date (Hi-Lo)
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => setFilteredTasks(sortTasks(tasks, "createdAt"))}
+              >
+                <i className="bi bi-clock me-2"></i>
+                Sort by Created At
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() =>
+                  setFilteredTasks(sortTasks(tasks, "taskNotDone"))
+                }
+              >
+                <i className="bi bi-check-square-fill me-2"></i>
+                Sort by Status Done
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => setFilteredTasks(sortTasks(tasks, "taskDone"))}
+              >
+                <i className="bi bi-check-square me-2"></i>
+                Sort by Status Not Done
+              </button>
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => setFilteredTasks(sortTasks(tasks, "reset"))}
+              >
+                <i className="bi bi-arrow-clockwise me-2"></i>
+                Reset Sort
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
     </>
   );
 };
 
-const TaskList = ({ setTaskUpdate, tasks, setTasks, filteredTasks, setFilteredTasks, setUpdateMode}) => {
+const TaskList = ({
+  setTaskUpdate,
+  tasks,
+  setTasks,
+  filteredTasks,
+  setFilteredTasks,
+  setUpdateMode,
+  setAttachmentList,
+}) => {
   return (
     <>
       <div className="card shadow-sm mx-5 mt-5">
-        <TaskListHeader />
+        <TaskListHeader setFilteredTasks={setFilteredTasks} tasks={tasks} />
 
         {/* Task List */}
         {filteredTasks.length > 0 ? (
@@ -35,10 +155,22 @@ const TaskList = ({ setTaskUpdate, tasks, setTasks, filteredTasks, setFilteredTa
                     <small className="text-muted">{task.description}</small>
                   </div>
                   <div className="d-flex justify-content-end">
-                    <small className="text-muted mx-3">{task.createdAt.slice(0, 10)}</small>
+                    <small className="text-muted mx-3">
+                      {task.createdAt.slice(0, 10)}
+                    </small>
                     <button
-                      className="btn btn-sm btn-outline-success me-1"
+                      className={`btn btn-sm ${
+                        task.taskDone ? "btn-success" : "btn-outline-success"
+                      } me-1`}
                       title="Done"
+                      onClick={() => {
+                        const updatedTasks = tasks.map((t) =>
+                          t.id === task.id ? { ...t, taskDone: !t.taskDone } : t
+                        );
+                        setTasks(updatedTasks);
+                        setFilteredTasks(updatedTasks);
+                        //console.log(updatedTasks.filter((t) => t.id === task.id)[0]);
+                      }}
                     >
                       <i className="bi bi-check-lg"></i>
                     </button>
@@ -47,6 +179,7 @@ const TaskList = ({ setTaskUpdate, tasks, setTasks, filteredTasks, setFilteredTa
                       title="Edit"
                       onClick={() => {
                         setTaskUpdate(task);
+                        setAttachmentList(Array.from(task.attachments) || []);
                         setUpdateMode(true);
                       }}
                     >
@@ -57,8 +190,10 @@ const TaskList = ({ setTaskUpdate, tasks, setTasks, filteredTasks, setFilteredTa
                       title="Delete"
                       onClick={() => {
                         // Handle delete action
-                        setTasks(tasks.filter(t => t.id !== task.id));
-                        setFilteredTasks(filteredTasks.filter(t => t.id !== task.id));
+                        setTasks(tasks.filter((t) => t.id !== task.id));
+                        setFilteredTasks(
+                          filteredTasks.filter((t) => t.id !== task.id)
+                        );
                       }}
                     >
                       <i className="bi bi-trash"></i>

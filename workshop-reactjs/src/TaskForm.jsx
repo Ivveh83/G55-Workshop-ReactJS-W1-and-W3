@@ -2,7 +2,14 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { generateId } from "./idGenerator";
 
-const TaskForm = ({ tasks, setTasks, setFilteredTasks, update, setUpdate }) => {
+const TaskForm = ({
+  tasks,
+  setTasks,
+  setFilteredTasks,
+  update,
+  attachmentList,
+  setAttachmentList,
+}) => {
   useEffect(() => {}, [update]);
 
   const {
@@ -20,7 +27,7 @@ const TaskForm = ({ tasks, setTasks, setFilteredTasks, update, setUpdate }) => {
         : data.assignedTo;
     const newTask = {
       ...data,
-      attachments: data.attachments ? Array.from(data.attachments) : [],
+      attachments: attachmentList ? Array.from(attachmentList) : [],
     };
     setTasks([...tasks, newTask]);
     setFilteredTasks([...tasks, newTask]);
@@ -31,6 +38,7 @@ const TaskForm = ({ tasks, setTasks, setFilteredTasks, update, setUpdate }) => {
     document.getElementById("dueDate").value = "";
     document.getElementById("selectPerson").value = "";
     document.getElementById("attachments").value = "";
+    setAttachmentList([]); // Clear the attachment list
   };
 
   return (
@@ -122,10 +130,29 @@ const TaskForm = ({ tasks, setTasks, setFilteredTasks, update, setUpdate }) => {
                 id="attachments"
                 multiple
                 {...register("attachments")}
+                onChange={(e) => {
+                  setAttachmentList(Array.from(e.target.files));
+                }}
               />
             </div>
             <div className="mt-3 border p-2">
-              <ul id="attachmentList" className="list-group mt-5"></ul>
+              <ul id="attachmentList" className="list-group mt-5">
+                {attachmentList.length > 0 &&
+                  attachmentList.map((file, index) => (
+                    <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                      {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-danger"
+                        onClick={() => {
+                          setAttachmentList(attachmentList.filter((_, i) => i !== index));
+                        }}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </li>
+                  ))}
+              </ul>
             </div>
             <div className="d-flex justify-content-end mt-3">
               <button type="submit" className="btn btn-primary">
