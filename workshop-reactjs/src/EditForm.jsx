@@ -28,6 +28,7 @@ const EditForm = ({
   const onSubmit = (data) => {
     data.id = task.id; // Keep the same ID for the task being updated
     data.createdAt = task.createdAt; // Keep the original creation date
+    data.taskDone = task.taskDone; // Keep the original taskDone status
     data.assignedTo =
       data.assignedTo === "-- Select Person (Optional) --"
         ? ""
@@ -36,7 +37,7 @@ const EditForm = ({
       ...data,
       attachments: attachmentList ? Array.from(attachmentList) : [],
     };
-    setTask(updatedTask);
+    setTask(updatedTask); // Update the task state
     setTasks(tasks.map((t) => (t.id === task.id ? updatedTask : t)));
     setFilteredTasks(
       filteredTasks.map((t) => (t.id === task.id ? updatedTask : t))

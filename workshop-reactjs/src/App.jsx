@@ -32,7 +32,7 @@ const App = () => {
           <Sidebar />
 
           <main className="col-md-10 ms-sm-auto px-md-4 py-4">
-            <Topbar tasks={tasks} setTasks={setFilteredTasks} />
+            <Topbar tasks={tasks} setFilteredTasks={setFilteredTasks} />
             {updateMode ? (
               <EditForm
                 task={taskUpdate}

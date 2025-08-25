@@ -21,6 +21,7 @@ const TaskForm = ({
   const onSubmit = (data) => {
     data.id = generateId(tasks);
     data.createdAt = new Date().toLocaleString();
+    data.taskDone = false;
     data.assignedTo =
       data.assignedTo === "-- Select Person (Optional) --"
         ? ""

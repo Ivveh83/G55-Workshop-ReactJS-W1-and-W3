@@ -1,11 +1,42 @@
 import { sortTasks, filterTasks } from "./taskService";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
-const TaskListHeader = ({ setFilteredTasks, tasks }) => {
+const TaskListHeader = ({ setFilteredTasks, filteredTasks, tasks }) => {
+  //const [fromDate, setFromDate] = useState("");
+  //const [toDate, setToDate] = useState("");
+  const [submenuOpen, setSubmenuOpen] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    trigger,
+    clearErrors,
+    reset,
+    formState: { errors },
+  } = useForm({ defaultValues: { from: "", to: "" } });
+  const from = watch("from");
+  const to = watch("to");
+  useEffect(() => {
+    trigger(["from", "to"]);
+  }, [from, to, trigger]);
+  
+
+  const onSubmit = (data) => {
+    setFilteredTasks(
+      filterTasks(tasks, filteredTasks, "betweenDueDates", data.from, data.to)
+    );
+    clearErrors(["from", "to"]);
+    setSubmenuOpen(false);
+  };
+
   return (
     <>
       <div className="card-header bg-white d-flex justify-content-between align-items-center px-3">
         <h5 className="mb-0">Todos</h5>
         <div className="btn-group">
+          {/* Filtering buttons*/}
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm"
@@ -19,7 +50,9 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
             <li>
               <button
                 className="dropdown-item"
-                onClick={() => setFilteredTasks(filterTasks(tasks, "done"))}
+                onClick={() =>
+                  setFilteredTasks(filterTasks(tasks, filteredTasks, "done"))
+                }
               >
                 <i className="bi bi-check-square-fill me-2"></i>
                 Show Done Tasks
@@ -28,13 +61,113 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
             <li>
               <button
                 className="dropdown-item"
-                onClick={() => setFilteredTasks(filterTasks(tasks, "notDone"))}
+                onClick={() =>
+                  setFilteredTasks(filterTasks(tasks, filteredTasks, "notDone"))
+                }
               >
                 <i className="bi bi-check-square me-2"></i>
                 Show Not Done Tasks
               </button>
             </li>
+
+            {/* Hover submenu for filtering by due date */}
+            <li className={`dropdown-submenu ${submenuOpen ? "show" : ""}`}>
+              <button
+                className="dropdown-item d-flex justify-content-between align-items-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSubmenuOpen(!submenuOpen);
+                }}
+              >
+                <span>
+                  <i className="bi bi-calendar-range me-2"></i>
+                  Filter by Due Date
+                </span>
+                <i className="bi bi-chevron-right"></i>
+              </button>
+
+              {submenuOpen && (
+                <ul
+                  className="dropdown-menu p-3 shadow position-absolute top-0 start-100"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div>
+                    <button
+                      className="btn-close border position-absolute top-0 end-0 m-1 p-2"
+                      onClick={() => setSubmenuOpen(false)}
+                    ></button>
+                  </div>
+                  <div className="mt-3">
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className="mb-2">
+                      <label className="form-label">From</label>
+                      <small className="text-danger">
+                        {errors.from && errors.from.message}&nbsp;
+                      </small>
+                      <input
+                        type="date"
+                        className="form-control"
+                        {...register("from", {
+                          required: " is required",
+                          validate: (value) => {
+                            return (
+                              !to ||
+                              new Date(value) <= new Date(to) ||
+                              " must be before 'To' date"
+                            );
+                          },
+                        })}
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <label className="form-label">To</label>
+                      <small className="text-danger">
+                        {errors.to && errors.to.message}&nbsp;
+                      </small>
+                      <input
+                        type="date"
+                        className="form-control"
+                        {...register("to", {
+                          required: " is required",
+                          validate: (value) => {
+                            return (
+                              !from ||
+                              new Date(value) >= new Date(from) ||
+                              " must be after 'From' date"
+                            );
+                          },
+                        })}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="btn btn-sm btn-primary w-100"
+                    >
+                      Apply
+                    </button>
+                  </form>
+                  </div>
+                </ul>
+              )}
+            </li>
+            <li>
+              <button
+                className="dropdown-item"
+                onClick={() => {
+                  setFilteredTasks(filterTasks(tasks, "all"));
+                  //setFromDate("");
+                  //setToDate("");
+                  reset({ from: "", to: "" });
+                  setSubmenuOpen(false);
+                }}
+              >
+                <i className="bi bi-arrow-counterclockwise me-2"></i>
+                Reset Filter
+              </button>
+            </li>
           </ul>
+
+          {/* Sorting buttons*/}
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm"
@@ -48,7 +181,9 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
             <li>
               <button
                 className="dropdown-item"
-                onClick={() => setFilteredTasks(sortTasks(tasks, "titleA-Z"))}
+                onClick={() =>
+                  setFilteredTasks(sortTasks(tasks, filteredTasks, "titleA-Z"))
+                }
               >
                 <i className="bi bi-sort-alpha-down me-2"></i>
                 Sort by Title (A-Z)
@@ -57,7 +192,9 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
             <li>
               <button
                 className="dropdown-item"
-                onClick={() => setFilteredTasks(sortTasks(tasks, "titleZ-A"))}
+                onClick={() =>
+                  setFilteredTasks(sortTasks(tasks, filteredTasks, "titleZ-A"))
+                }
               >
                 <i className="bi bi-sort-alpha-up me-2"></i>
                 Sort by Title (Z-A)
@@ -67,7 +204,9 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
               <button
                 className="dropdown-item"
                 onClick={() =>
-                  setFilteredTasks(sortTasks(tasks, "dueDateAscending"))
+                  setFilteredTasks(
+                    sortTasks(tasks, filteredTasks, "dueDateAscending")
+                  )
                 }
               >
                 <i className="bi bi-calendar2-day me-2"></i>
@@ -78,7 +217,9 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
               <button
                 className="dropdown-item"
                 onClick={() =>
-                  setFilteredTasks(sortTasks(tasks, "dueDateDescending"))
+                  setFilteredTasks(
+                    sortTasks(tasks, filteredTasks, "dueDateDescending")
+                  )
                 }
               >
                 <i className="bi bi-calendar2-day me-2"></i>
@@ -88,7 +229,9 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
             <li>
               <button
                 className="dropdown-item"
-                onClick={() => setFilteredTasks(sortTasks(tasks, "createdAt"))}
+                onClick={() =>
+                  setFilteredTasks(sortTasks(tasks, filteredTasks, "createdAt"))
+                }
               >
                 <i className="bi bi-clock me-2"></i>
                 Sort by Created At
@@ -98,7 +241,9 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
               <button
                 className="dropdown-item"
                 onClick={() =>
-                  setFilteredTasks(sortTasks(tasks, "taskNotDone"))
+                  setFilteredTasks(
+                    sortTasks(tasks, filteredTasks, "taskNotDone")
+                  )
                 }
               >
                 <i className="bi bi-check-square-fill me-2"></i>
@@ -108,7 +253,10 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
             <li>
               <button
                 className="dropdown-item"
-                onClick={() => setFilteredTasks(sortTasks(tasks, "taskDone"))}
+                onClick={() => {
+                  setFilteredTasks(sortTasks(tasks, filteredTasks, "taskDone"));
+                  console.log(filteredTasks);
+                }}
               >
                 <i className="bi bi-check-square me-2"></i>
                 Sort by Status Not Done
@@ -117,10 +265,12 @@ const TaskListHeader = ({ setFilteredTasks, tasks }) => {
             <li>
               <button
                 className="dropdown-item"
-                onClick={() => setFilteredTasks(sortTasks(tasks, "reset"))}
+                onClick={() => {setFilteredTasks(sortTasks(tasks, "reset"));
+                  reset({ from: "", to: "" }); // Clear Filter by Due Date fields and errors as well
+                }}
               >
-                <i className="bi bi-arrow-clockwise me-2"></i>
-                Reset Sort
+                <i className="bi bi-arrow-counterclockwise me-2"></i>
+                Reset and Show All
               </button>
             </li>
           </ul>
@@ -142,7 +292,11 @@ const TaskList = ({
   return (
     <>
       <div className="card shadow-sm mx-5 mt-5">
-        <TaskListHeader setFilteredTasks={setFilteredTasks} tasks={tasks} />
+        <TaskListHeader
+          setFilteredTasks={setFilteredTasks}
+          tasks={tasks}
+          filteredTasks={filteredTasks}
+        />
 
         {/* Task List */}
         {filteredTasks.length > 0 ? (
@@ -220,7 +374,7 @@ const TaskList = ({
           ))
         ) : (
           <div className="card-body text-center">
-            <p className="text-muted">No tasks available. Please add a task.</p>
+            <p className="text-muted">No tasks available.</p>
           </div>
         )}
       </div>

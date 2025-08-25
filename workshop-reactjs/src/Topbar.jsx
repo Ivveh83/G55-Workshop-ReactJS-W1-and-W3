@@ -1,6 +1,6 @@
 import { searchTasks } from "./taskService";
 
-const Topbar = ({ tasks, setTasks }) => {
+const Topbar = ({ tasks, setFilteredTasks }) => {
   return (
     <>
       <div className="d-flex justify-content-between mb-4">
@@ -14,7 +14,7 @@ const Topbar = ({ tasks, setTasks }) => {
               aria-label="Search"
               onChange={(e) => {
                 const filtered = searchTasks(tasks, e.target.value);
-                setTasks(filtered);
+                setFilteredTasks(filtered);
               }}
             />
             {/*<button className="btn btn-outline-secondary" type="submit">

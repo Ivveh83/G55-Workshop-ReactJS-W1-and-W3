@@ -67,7 +67,7 @@ const Sidebar = () => {
     <>
 {/* Offcanvas sidebar för mobil */}
           <nav
-            className="offcanvas offcanvas-start d-md-none"
+            className="offcanvas offcanvas-start d-md-none" // d-md-none hides it on larger screens than md
             tabIndex="-1"
             id="mobileSidebar"
             aria-labelledby="mobileSidebarLabel"

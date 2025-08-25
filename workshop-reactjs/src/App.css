@@ -6,13 +6,10 @@ hr {
     opacity: 40%;
 }
 
-/* Gör undermenyn */
-.dropdown-submenu {
-  position: relative;
-}
-
 .dropdown-submenu > .dropdown-menu {
-  top: 0;
-  left: 100%;
-  margin-top: -5px;
+  display: none;
+  margin-left: 0.3rem;
+}
+.dropdown-submenu.show > .dropdown-menu {
+  display: block;
 }
